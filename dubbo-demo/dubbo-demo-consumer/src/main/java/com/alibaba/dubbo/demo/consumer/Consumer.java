@@ -17,7 +17,10 @@
 package com.alibaba.dubbo.demo.consumer;
 
 import com.alibaba.dubbo.demo.DemoService;
+import com.alibaba.dubbo.rpc.RpcContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.concurrent.Future;
 
 public class Consumer {
 
@@ -32,8 +35,25 @@ public class Consumer {
         while (true) {
             try {
                 Thread.sleep(1000);
-                String hello = demoService.sayHello("world"); // call remote method
+                /**
+                 * 异步变同步
+                 */
+                String hello = demoService.sayHello("niyulu"); // call remote method
                 System.out.println(hello); // get result
+
+                /**
+                 * 异步有返回值
+                 */
+//                Future<Object> future = RpcContext.getContext().getFuture();
+//                System.out.println(future.get());
+
+                /**
+                 * 异步无返回值
+                 */
+//                Future<Object> future = RpcContext.getContext().getFuture();
+//                System.out.println(future);
+
+
 
             } catch (Throwable throwable) {
                 throwable.printStackTrace();

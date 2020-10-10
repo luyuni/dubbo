@@ -67,6 +67,7 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
     @Override
     protected Result doInvoke(final Invocation invocation) throws Throwable {
         RpcInvocation inv = (RpcInvocation) invocation;
+        // 拿到methodName
         final String methodName = RpcUtils.getMethodName(invocation);
         inv.setAttachment(Constants.PATH_KEY, getUrl().getPath());
         inv.setAttachment(Constants.VERSION_KEY, version);
@@ -79,18 +80,19 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         }
         try {
             boolean isAsync = RpcUtils.isAsync(getUrl(), invocation);
+            // 是不是异步无返回值
             boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
             int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
-            if (isOneway) {
+            if (isOneway) {//异步无返回值
                 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
                 currentClient.send(inv, isSent);
                 RpcContext.getContext().setFuture(null);
                 return new RpcResult();
-            } else if (isAsync) {
+            } else if (isAsync) {//异步有返回值
                 ResponseFuture future = currentClient.request(inv, timeout);
                 RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));
                 return new RpcResult();
-            } else {
+            } else {//异步变同步（默认通信方式）
                 RpcContext.getContext().setFuture(null);
                 return (Result) currentClient.request(inv, timeout).get();
             }
